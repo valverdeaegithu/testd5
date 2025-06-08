@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Live Match - @matcheslinks</title>
+  <title>Test Match - 1 Minute Countdown</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -13,54 +13,16 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 100vh;
+      height: 100vh;
       margin: 0;
       text-align: center;
     }
 
-    .telegram-brand {
-      position: fixed;
-      top: 20px;
-      left: 20px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .telegram-logo {
-      width: 40px;
-      height: 40px;
-    }
-
-    .channel-name {
-      font-size: 20px;
-      font-weight: bold;
-      color: #0088cc;
-    }
-
     .countdown-display {
-      font-size: 4rem;
-      display: flex;
-      gap: 20px;
-      background: rgba(0,0,0,0.7);
+      font-size: 3rem;
+      background: rgba(0, 0, 0, 0.7);
       padding: 20px 30px;
-      border-radius: 15px;
-    }
-
-    .time-unit {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .time-value {
-      font-size: 4rem;
-      color: #00ff00;
-    }
-
-    .time-label {
-      font-size: 1rem;
-      color: #aaa;
+      border-radius: 10px;
     }
 
     .status-message {
@@ -68,22 +30,11 @@
       margin-bottom: 20px;
     }
 
-    .tg-button {
-      background: #0088cc;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 20px;
-      font-weight: bold;
-      text-decoration: none;
-      margin-top: 20px;
-    }
-
     .player-container {
       width: 100%;
       height: 100vh;
-      background: #000;
-      position: relative;
       display: none;
+      background: #000;
     }
 
     .player-container iframe {
@@ -95,93 +46,42 @@
 </head>
 <body>
 
-  <!-- Telegram Branding -->
-  <div class="telegram-brand">
-    <svg class="telegram-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
-      <circle cx="120" cy="120" r="120" fill="#0088cc"/>
-      <path d="M81.229,128.772l14.237,39.406s1.78,3.687,3.686,3.687,30.255-29.492,30.255-29.492l31.525-60.89L81.737,118.6Z" fill="#c8daea"/>
-      <path d="M100.106,138.878l-2.733,29.046s-1.144,8.9,7.754,0,17.415-15.763,17.415-15.763" fill="#a9c6d8"/>
-      <path d="M81.486,130.178,52.2,120.636s-3.5-1.42-2.373-4.64c.232-.664.7-1.229,2.1-2.2,6.489-4.523,120.106-45.36,120.106-45.36s3.208-1.081,5.1-.362a2.766,2.766,0,0,1,1.885,2.055,9.357,9.357,0,0,1,.254,2.585c-.009.752-.1,1.449-.169,2.542-.692,11.165-21.4,94.493-21.4,94.493s-1.239,4.876-5.678,5.043A8.13,8.13,0,0,1,146.1,172.5c-8.711-7.493-38.819-27.727-45.472-32.177a1.27,1.27,0,0,1-.546-.9c-.093-.469.417-1.05.417-1.05s52.426-46.6,53.821-51.492c.108-.379-.3-.566-.848-.4-3.482,1.281-63.844,39.4-70.506,43.607A3.21,3.21,0,0,1,81.486,130.178Z" fill="#fff"/>
-    </svg>
-    <div class="channel-name">@matcheslinks</div>
-  </div>
-
-  <!-- Countdown -->
   <div id="countdownContainer">
-    <div class="status-message">Live stream starting in:</div>
-    <div class="countdown-display">
-      <div class="time-unit">
-        <div class="time-value" id="hours">00</div>
-        <div class="time-label">Hours</div>
-      </div>
-      <div class="time-unit">
-        <div class="time-value" id="minutes">00</div>
-        <div class="time-label">Minutes</div>
-      </div>
-      <div class="time-unit">
-        <div class="time-value" id="seconds">00</div>
-        <div class="time-label">Seconds</div>
-      </div>
-    </div>
-    <a href="https://t.me/matcheslinks" class="tg-button" target="_blank">Join Telegram Channel</a>
+    <div class="status-message">Match starting in:</div>
+    <div class="countdown-display" id="countdown">00:60</div>
   </div>
 
-  <!-- Player -->
   <div class="player-container" id="playerContainer"></div>
 
   <script>
+    const countdownElement = document.getElementById('countdown');
     const countdownContainer = document.getElementById('countdownContainer');
     const playerContainer = document.getElementById('playerContainer');
-    const hoursEl = document.getElementById('hours');
-    const minutesEl = document.getElementById('minutes');
-    const secondsEl = document.getElementById('seconds');
 
-    // Set fixed target time to 12:00 AM IST
-    function getTargetDate() {
-      const now = new Date();
-      const target = new Date(now);
-      target.setHours(0, 0, 0, 0); // Set to 12:00 AM
-
-      if (now >= target) {
-        // If current time is past 12:00 AM, set for next day
-        target.setDate(target.getDate() + 1);
-      }
-
-      return target;
-    }
-
-    const targetTime = getTargetDate().getTime();
+    let countdownSeconds = 60;
 
     function updateCountdown() {
-      const now = new Date().getTime();
-      const distance = targetTime - now;
+      countdownSeconds--;
+      const minutes = String(Math.floor(countdownSeconds / 60)).padStart(2, '0');
+      const seconds = String(countdownSeconds % 60).padStart(2, '0');
+      countdownElement.textContent = `${minutes}:${seconds}`;
 
-      if (distance <= 0) {
+      if (countdownSeconds <= 0) {
         clearInterval(timer);
         countdownContainer.style.display = 'none';
-        loadVideo();
-        return;
+        showVideo();
       }
-
-      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-      hoursEl.textContent = hours.toString().padStart(2, '0');
-      minutesEl.textContent = minutes.toString().padStart(2, '0');
-      secondsEl.textContent = seconds.toString().padStart(2, '0');
     }
 
-    function loadVideo() {
+    function showVideo() {
       playerContainer.style.display = 'block';
       const iframe = document.createElement('iframe');
-      iframe.src = 'https://sonylive.pages.dev/play?id=1090482895&autoplay=1';
-      iframe.allow = 'autoplay; fullscreen; encrypted-media';
+      iframe.src = 'https://sonylive.pages.dev/play?id=1090479641&autoplay=1';
+      iframe.allow = 'autoplay; fullscreen';
       iframe.allowFullscreen = true;
       playerContainer.appendChild(iframe);
     }
 
-    updateCountdown();
     const timer = setInterval(updateCountdown, 1000);
   </script>
 
